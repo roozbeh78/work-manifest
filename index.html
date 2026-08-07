@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تخته‌ی عملیات روزانه</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1A1A1A">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="تخته عملیات">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root{
+  --bg:#EDEDE8;
+  --ink:#1A1A1A;
+  --ink-soft:#5A5A54;
+  --line:#1A1A1A;
+  --card-line:#00000022;
+  --col-todo:#FBD8DC;
+  --col-todo-line:#D98C96;
+  --col-progress:#FFEBAE;
+  --col-progress-line:#D9A93F;
+  --col-done:#D3EFD8;
+  --col-done-line:#5FAE6E;
+  --accent:#2F6FED;
+  --white:#FFFFFF;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Vazirmatn', sans-serif;min-height:100vh;padding:20px 14px 70px;
+}
+.wrap{max-width:1100px;margin:0 auto;}
+
+.header{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  border-bottom:3px solid var(--ink);padding-bottom:14px;margin-bottom:16px;
+}
+.header-title{font-weight:800;font-size:19px;}
+.header-sub{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-soft);letter-spacing:1px;margin-top:3px;}
+.view-toggle{display:flex;border:2px solid var(--ink);border-radius:8px;overflow:hidden;}
+.view-toggle button{
+  border:none;background:var(--white);color:var(--ink);padding:8px 16px;font-family:inherit;
+  font-size:12.5px;font-weight:700;cursor:pointer;
+}
+.view-toggle button.active{background:var(--ink);color:var(--white);}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.tab{
+  border:2px solid var(--ink);border-radius:20px;padding:6px 16px;font-size:13px;font-weight:600;
+  cursor:pointer;background:var(--white);white-space:nowrap;
+}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tab-count{font-family:'JetBrains Mono',monospace;font-size:10px;opacity:0.75;margin-right:4px;}
+.tab-add{
+  border:2px dashed var(--ink-soft);border-radius:20px;padding:6px 14px;font-size:13px;
+  background:transparent;color:var(--ink-soft);cursor:pointer;
+}
+
+.add-company-form{
+  display:none;gap:8px;margin-bottom:16px;flex-wrap:wrap;
+  border:2px dashed var(--ink);border-radius:10px;padding:12px;
+}
+.add-company-form.open{display:flex;}
+.add-company-form input{
+  flex:1;min-width:160px;border:1.5px solid var(--ink);border-radius:6px;padding:8px 12px;
+  font-family:inherit;font-size:13px;background:var(--white);
+}
+.add-company-form button{
+  border:1.5px solid var(--ink);background:var(--ink);color:#fff;border-radius:6px;
+  padding:8px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+}
+
+.empty-hint{text-align:center;color:var(--ink-soft);font-size:13px;padding:40px 10px;}
+
+/* ---------- kanban ---------- */
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media (max-width:760px){ .kanban{grid-template-columns:1fr;} }
+.column{border:2px solid var(--ink);border-radius:12px;padding:12px;min-height:120px;}
+.column.todo{background:var(--col-todo);}
+.column.progress{background:var(--col-progress);}
+.column.done{background:var(--col-done);}
+.column-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:800;font-size:13.5px;}
+.column-count{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:0.7;}
+
+.card{
+  background:var(--white);border:1.5px solid var(--card-line);border-radius:8px;
+  padding:9px 11px;margin-bottom:8px;box-shadow:1px 2px 0 rgba(0,0,0,0.08);
+}
+.card-title{font-size:13px;font-weight:600;margin-bottom:5px;word-break:break-word;}
+.card-meta{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:var(--ink-soft);flex-wrap:wrap;gap:4px;}
+.card-due{font-family:'JetBrains Mono',monospace;}
+.card-due.overdue{color:#C13A3A;font-weight:700;}
+.card-actions{display:flex;gap:4px;}
+.card-actions button{
+  border:none;background:none;cursor:pointer;font-size:12px;padding:2px 4px;color:var(--ink-soft);
+}
+.card-actions button:hover{color:var(--ink);}
+
+.add-card-row{display:flex;flex-direction:column;gap:5px;margin-top:6px;}
+.add-card-row input{
+  border:1px solid var(--ink);border-radius:6px;padding:6px 9px;font-family:inherit;font-size:12px;background:var(--white);
+}
+.add-card-row .row2{display:flex;gap:5px;}
+.add-card-row .row2 input{flex:1;}
+.add-card-row button{
+  border:1.5px solid var(--ink);background:var(--ink);color:#fff;border-radius:6px;
+  padding:6px 10px;font-family:inherit;font-size:11.5px;cursor:pointer;
+}
+
+/* ---------- list view ---------- */
+.list{border:2px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--white);}
+.list-row{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #ddd;
+}
+.list-row:last-child{border-bottom:none;}
+.list-row.done{opacity:0.55;}
+.list-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;}
+.list-title{flex:1;font-size:13.5px;}
+.list-title.done{text-decoration:line-through;}
+.list-due{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);width:80px;flex-shrink:0;}
+.list-due.overdue{color:#C13A3A;font-weight:700;}
+.list-owner{font-size:11.5px;color:var(--ink-soft);width:80px;flex-shrink:0;}
+.list-status select{
+  border:1px solid var(--ink-soft);border-radius:5px;padding:4px 6px;font-family:inherit;font-size:11px;background:var(--white);
+}
+.list-del{border:none;background:none;color:#C13A3A;cursor:pointer;font-size:12px;opacity:0.7;}
+.list-del:hover{opacity:1;}
+.add-list-row{display:flex;gap:6px;padding:10px 14px;flex-wrap:wrap;background:#FAFAF7;}
+.add-list-row input{border:1px solid var(--ink);border-radius:6px;padding:7px 10px;font-family:inherit;font-size:12.5px;}
+.add-list-row input.title{flex:2;min-width:140px;}
+.add-list-row input.due{width:120px;}
+.add-list-row input.owner{width:100px;}
+.add-list-row button{border:1.5px solid var(--ink);background:var(--ink);color:#fff;border-radius:6px;padding:7px 14px;font-family:inherit;font-size:12px;cursor:pointer;}
+
+.actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.btn{border:1.5px solid var(--ink);border-radius:7px;padding:9px 16px;font-family:inherit;font-size:12.5px;cursor:pointer;font-weight:600;background:var(--white);}
+.btn:hover{background:var(--ink);color:#fff;}
+.btn.danger{border-color:#C13A3A;color:#C13A3A;}
+.btn.danger:hover{background:#C13A3A;color:#fff;}
+
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;
+  opacity:0;pointer-events:none;transition:opacity 0.25s;font-family:'JetBrains Mono',monospace;
+}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div>
+      <div class="header-title">تخته‌ی عملیات روزانه</div>
+      <div class="header-sub">کارهای امروز، به تفکیک شرکت</div>
+    </div>
+    <div class="view-toggle">
+      <button id="viewListBtn">لیست</button>
+      <button id="viewKanbanBtn">کانبان</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="add-company-form" id="addCompanyForm">
+    <input type="text" id="newCompanyName" placeholder="نام شرکت جدید...">
+    <button id="addCompanyConfirm">افزودن</button>
+  </div>
+
+  <div id="board"></div>
+  <div id="emptyHint" class="empty-hint" style="display:none;">هنوز شرکتی اضافه نکردی — از بالا یه تخته بساز.</div>
+
+  <div class="actions">
+    <button class="btn" id="exportBtn">دانلود فایل پشتیبان</button>
+    <button class="btn" id="importBtn">بارگذاری فایل پشتیبان</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none;">
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let state = { companies: [], activeCompanyId: null, view: 'kanban' };
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function hasCloudStorage(){
+  return typeof window !== 'undefined' && !!window.storage && typeof window.storage.get === 'function';
+}
+function withTimeout(p, ms){ return Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]); }
+async function storageGetRaw(key){
+  if(hasCloudStorage()){ const r = await withTimeout(window.storage.get(key,false),4000); return r.value; }
+  const v = localStorage.getItem('ops-board:'+key);
+  if(v===null) throw new Error('missing');
+  return v;
+}
+async function storageSetRaw(key, value){
+  try{
+    if(hasCloudStorage()){ await withTimeout(window.storage.set(key,value,false),4000); }
+    else{ localStorage.setItem('ops-board:'+key, value); }
+    return true;
+  }catch(e){ console.error('save failed', e); return false; }
+}
+async function loadState(){
+  try{ state = JSON.parse(await storageGetRaw('state')); }
+  catch(e){ state = { companies: [], activeCompanyId: null, view: 'kanban' }; }
+}
+async function saveState(){ return await storageSetRaw('state', JSON.stringify(state)); }
+
+function activeCompany(){
+  return state.companies.find(c=>c.id===state.activeCompanyId) || null;
+}
+
+function renderTabs(){
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  state.companies.forEach(c=>{
+    const openCount = c.tasks.filter(t=>t.status!=='done').length;
+    const tab = document.createElement('div');
+    tab.className = 'tab ' + (c.id===state.activeCompanyId ? 'active' : '');
+    tab.innerHTML = `${c.name} <span class="tab-count">${openCount}</span>`;
+    tab.addEventListener('click', ()=>{ state.activeCompanyId = c.id; saveState(); renderAll(); });
+    tabs.appendChild(tab);
+  });
+  const addBtn = document.createElement('div');
+  addBtn.className = 'tab-add';
+  addBtn.textContent = '+ شرکت جدید';
+  addBtn.addEventListener('click', ()=>{
+    document.getElementById('addCompanyForm').classList.toggle('open');
+  });
+  tabs.appendChild(addBtn);
+}
+
+function renderViewToggle(){
+  document.getElementById('viewListBtn').classList.toggle('active', state.view==='list');
+  document.getElementById('viewKanbanBtn').classList.toggle('active', state.view==='kanban');
+}
+
+function isOverdue(due){
+  if(!due) return false;
+  return due < todayStr();
+}
+
+function renderBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  const company = activeCompany();
+  document.getElementById('emptyHint').style.display = state.companies.length===0 ? 'block' : 'none';
+  if(!company) return;
+
+  if(state.view === 'kanban'){
+    board.appendChild(renderKanban(company));
+  } else {
+    board.appendChild(renderList(company));
+  }
+}
+
+function renderKanban(company){
+  const wrap = document.createElement('div');
+  wrap.className = 'kanban';
+  const cols = [
+    {key:'todo', title:'باید انجام بشه', cls:'todo'},
+    {key:'progress', title:'در حال انجام', cls:'progress'},
+    {key:'done', title:'انجام شد', cls:'done'}
+  ];
+  cols.forEach(col=>{
+    const tasks = company.tasks.filter(t=>t.status===col.key);
+    const colDiv = document.createElement('div');
+    colDiv.className = 'column ' + col.cls;
+    colDiv.innerHTML = `<div class="column-head"><span>${col.title}</span><span class="column-count">${tasks.length}</span></div>`;
+
+    tasks.forEach(t=>{
+      const card = document.createElement('div');
+      card.className = 'card';
+      const overdue = isOverdue(t.due) && col.key!=='done';
+      card.innerHTML = `
+        <div class="card-title">${t.title}</div>
+        <div class="card-meta">
+          <span>${t.owner ? '👤 '+t.owner : ''}</span>
+          <span class="card-due ${overdue?'overdue':''}">${t.due ? t.due.slice(5) : ''}</span>
+        </div>
+        <div class="card-actions">
+          ${col.key!=='todo' ? '<button class="mv-left" title="عقب">◀</button>' : ''}
+          ${col.key!=='done' ? '<button class="mv-right" title="جلو">▶</button>' : ''}
+          <button class="mv-del" title="حذف">✕</button>
+        </div>
+      `;
+      const order = ['todo','progress','done'];
+      const idx = order.indexOf(col.key);
+      const leftBtn = card.querySelector('.mv-left');
+      const rightBtn = card.querySelector('.mv-right');
+      if(leftBtn) leftBtn.addEventListener('click', ()=>{ t.status = order[idx-1]; saveState(); renderBoard(); renderTabs(); });
+      if(rightBtn) rightBtn.addEventListener('click', ()=>{ t.status = order[idx+1]; saveState(); renderBoard(); renderTabs(); });
+      card.querySelector('.mv-del').addEventListener('click', ()=>{
+        company.tasks = company.tasks.filter(x=>x.id!==t.id);
+        saveState(); renderBoard(); renderTabs();
+      });
+      colDiv.appendChild(card);
+    });
+
+    const addRow = document.createElement('div');
+    addRow.className = 'add-card-row';
+    addRow.innerHTML = `
+      <input type="text" placeholder="کار جدید..." class="add-title">
+      <div class="row2">
+        <input type="date" class="add-due">
+        <input type="text" placeholder="مسئول" class="add-owner">
+      </div>
+      <button>افزودن</button>
+    `;
+    const doAdd = ()=>{
+      const title = addRow.querySelector('.add-title').value.trim();
+      if(!title) return;
+      company.tasks.push({
+        id: uid(), title,
+        due: addRow.querySelector('.add-due').value || '',
+        owner: addRow.querySelector('.add-owner').value.trim(),
+        status: col.key
+      });
+      saveState(); renderBoard(); renderTabs();
+    };
+    addRow.querySelector('button').addEventListener('click', doAdd);
+    addRow.querySelector('.add-title').addEventListener('keydown', (e)=>{ if(e.key==='Enter') doAdd(); });
+    colDiv.appendChild(addRow);
+
+    wrap.appendChild(colDiv);
+  });
+  return wrap;
+}
+
+function renderList(company){
+  const wrap = document.createElement('div');
+  wrap.className = 'list';
+
+  const sorted = [...company.tasks].sort((a,b)=>{
+    if(a.status==='done' && b.status!=='done') return 1;
+    if(a.status!=='done' && b.status==='done') return -1;
+    if(!a.due) return 1;
+    if(!b.due) return -1;
+    return a.due.localeCompare(b.due);
+  });
+
+  sorted.forEach(t=>{
+    const row = document.createElement('div');
+    row.className = 'list-row ' + (t.status==='done' ? 'done' : '');
+    const overdue = isOverdue(t.due) && t.status!=='done';
+    row.innerHTML = `
+      <input type="checkbox" ${t.status==='done'?'checked':''} class="chk">
+      <span class="list-title ${t.status==='done'?'done':''}">${t.title}</span>
+      <span class="list-due ${overdue?'overdue':''}">${t.due || ''}</span>
+      <span class="list-owner">${t.owner || ''}</span>
+      <span class="list-status">
+        <select>
+          <option value="todo" ${t.status==='todo'?'selected':''}>باید انجام بشه</option>
+          <option value="progress" ${t.status==='progress'?'selected':''}>در حال انجام</option>
+          <option value="done" ${t.status==='done'?'selected':''}>انجام شد</option>
+        </select>
+      </span>
+      <button class="list-del">✕</button>
+    `;
+    row.querySelector('.chk').addEventListener('change', (e)=>{
+      t.status = e.target.checked ? 'done' : 'todo';
+      saveState(); renderBoard(); renderTabs();
+    });
+    row.querySelector('select').addEventListener('change', (e)=>{
+      t.status = e.target.value; saveState(); renderBoard(); renderTabs();
+    });
+    row.querySelector('.list-del').addEventListener('click', ()=>{
+      company.tasks = company.tasks.filter(x=>x.id!==t.id);
+      saveState(); renderBoard(); renderTabs();
+    });
+    wrap.appendChild(row);
+  });
+
+  const addRow = document.createElement('div');
+  addRow.className = 'add-list-row';
+  addRow.innerHTML = `
+    <input type="text" placeholder="کار جدید..." class="title">
+    <input type="date" class="due">
+    <input type="text" placeholder="مسئول" class="owner">
+    <button>افزودن</button>
+  `;
+  const doAdd = ()=>{
+    const title = addRow.querySelector('.title').value.trim();
+    if(!title) return;
+    company.tasks.push({
+      id: uid(), title,
+      due: addRow.querySelector('.due').value || '',
+      owner: addRow.querySelector('.owner').value.trim(),
+      status: 'todo'
+    });
+    addRow.querySelector('.title').value='';
+    addRow.querySelector('.due').value='';
+    addRow.querySelector('.owner').value='';
+    saveState(); renderBoard(); renderTabs();
+  };
+  addRow.querySelector('button').addEventListener('click', doAdd);
+  addRow.querySelector('.title').addEventListener('keydown', (e)=>{ if(e.key==='Enter') doAdd(); });
+  wrap.appendChild(addRow);
+
+  return wrap;
+}
+
+function renderAll(){
+  renderTabs();
+  renderViewToggle();
+  renderBoard();
+}
+
+async function exportBackup(){
+  const backup = { exportedAt: new Date().toISOString(), state };
+  const blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ops-board-backup-' + todayStr() + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('فایل پشتیبان دانلود شد');
+}
+async function importBackup(file){
+  try{
+    const text = await file.text();
+    const backup = JSON.parse(text);
+    if(backup.state){
+      state = backup.state;
+      await saveState();
+      renderAll();
+      toast('پشتیبان بارگذاری شد ✓');
+    }
+  }catch(e){ console.error(e); toast('فایل پشتیبان معتبر نبود'); }
+}
+
+function attachListeners(){
+  document.getElementById('viewListBtn').addEventListener('click', ()=>{
+    state.view = 'list'; saveState(); renderAll();
+  });
+  document.getElementById('viewKanbanBtn').addEventListener('click', ()=>{
+    state.view = 'kanban'; saveState(); renderAll();
+  });
+
+  document.getElementById('addCompanyConfirm').addEventListener('click', ()=>{
+    const input = document.getElementById('newCompanyName');
+    const name = input.value.trim();
+    if(!name) return;
+    const c = { id: uid(), name, tasks: [] };
+    state.companies.push(c);
+    state.activeCompanyId = c.id;
+    input.value = '';
+    document.getElementById('addCompanyForm').classList.remove('open');
+    saveState(); renderAll();
+  });
+  document.getElementById('newCompanyName').addEventListener('keydown', (e)=>{
+    if(e.key==='Enter') document.getElementById('addCompanyConfirm').click();
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(file) importBackup(file);
+    e.target.value = '';
+  });
+}
+
+async function init(){
+  renderAll();
+  attachListeners();
+  try{
+    await loadState();
+    if(!state.activeCompanyId && state.companies.length>0) state.activeCompanyId = state.companies[0].id;
+    renderAll();
+  }catch(e){
+    console.error('background load failed', e);
+    toast('اتصال به حافظه برقرار نشد — نسخه‌ی موقت نمایش داده شد');
+  }
+}
+
+init();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(e=>console.log('sw registration skipped', e));
+  });
+}
+</script>
+</body>
+</html>
